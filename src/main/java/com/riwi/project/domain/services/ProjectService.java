@@ -4,7 +4,6 @@ import com.riwi.project.api.dto.request.ProjectRequest;
 import com.riwi.project.domain.model.ProjectEntity;
 import com.riwi.project.domain.repository.ProjectRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.context.config.ConfigDataResourceNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -34,7 +33,7 @@ public class ProjectService {
         return projectRepo.save(project);
     }
 
-    public ProjectEntity update(Long id,ProjectRequest projectRequest){
+    public ProjectEntity update(Long id, ProjectRequest projectRequest){
       ProjectEntity project = projectRepo.findById(id).orElse(null);
         if (projectRequest.getName() != null) {
             project.setName(projectRequest.getName());
