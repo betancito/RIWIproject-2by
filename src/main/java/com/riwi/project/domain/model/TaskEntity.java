@@ -2,12 +2,15 @@ package com.riwi.project.domain.model;
 
 import com.riwi.project.domain.enums.TaskStatus;
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.*;
 
-import java.util.List;
+import java.time.LocalDateTime;
 
 @Table(name = "task")
-@Data
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
 @Entity
 public class TaskEntity {
 
@@ -21,14 +24,27 @@ public class TaskEntity {
     @Column(columnDefinition = "TEXT")
     private String description;
 
+    @Column(updatable = false)
+    private LocalDateTime createdAt;
+
+    private LocalDateTime updatedAt;
+
+    @Enumerated(EnumType.STRING)
     private TaskStatus status;
 
-    @ManyToOne
-    @JoinColumn(name = "project_id",nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "project_id", nullable = false)
     private ProjectEntity project;
 
-    @OneToMany(mappedBy = "task", cascade = CascadeType.ALL)
-    @JoinColumn(name = "user_id", nullable = false)
-    private List<UserEntity> user;
+    // Auditoría
+    @PrePersist
+    public void prePersist() {
+        this.createdAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
+    }
 
+    @PreUpdate
+    public void preUpdate() {
+        this.updatedAt = LocalDateTime.now();
+    }
 }
