@@ -18,8 +18,9 @@ public class JwtService {
     @Value("${jwt.expiration}")
     private Long expiration;
 
-    public String generateToken(String username){
+    public String generateToken(String username, String role){
         Map<String, Object> claims = new HashMap<>();
+        claims.put("role", role);
         return Jwts.builder()
                 .claims()
                 .add(claims)
@@ -43,6 +44,9 @@ public class JwtService {
         return extractClaims(token).getSubject();
     }
 
+    public String extractRole(String token){
+        return extractClaims(token).get("role",String.class);
+    }
     public boolean isTokenExpired(String token){
         return extractClaims(token).getExpiration().before(new Date());
     }
