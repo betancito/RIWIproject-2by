@@ -1,8 +1,14 @@
 package com.riwi.project.infrastructure.security;
 
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.WebSecurityConfigurer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -10,28 +16,47 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
+@RequiredArgsConstructor
 public class SeurityConfig {
+    @Autowired
+    private UserDetailsService userService;
+
+    @Autowired
+    JwtAuthFilter jwtFilter;
 
     @Bean
     protected SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
          http
-                 .authorizeHttpRequests(auth -> auth
-                         .requestMatchers("/api/v1/users").hasRole("ADMIN")
-                         .anyRequest().authenticated()
-                 )
-                 .httpBasic(Customizer.withDefaults());
+                 .csrf(customizer -> customizer.disable())
+                 .authorizeHttpRequests(request -> request
+                         .requestMatchers("register","login")
+                         .permitAll()
+                         .anyRequest().authenticated())
+                 .httpBasic(Customizer.withDefaults())
+                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
          return http.build();
     }
+
     @Bean
-    public InMemoryUserDetailsManager userDetailsService() throws Exception {
-        User.UserBuilder users = User.withDefaultPasswordEncoder(); // Using the default password encoder
-        InMemoryUserDetailsManager manager = new InMemoryUserDetailsManager();
-        manager.createUser(users.username("user").password("password").roles("USER").build()); // Define your user here
-        return manager;
+    protected AuthenticationProvider authenticationProvider(){
+        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
+        provider.setPasswordEncoder(new BCryptPasswordEncoder(12));
+        provider.setUserDetailsService(userService);
+        return provider;
+    }
+
+    @Bean
+    protected AuthenticationManager authenticationManager(AuthenticationConfiguration config)throws Exception{
+        return config.getAuthenticationManager();
     }
 }
