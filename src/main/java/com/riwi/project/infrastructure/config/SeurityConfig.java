@@ -15,6 +15,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
@@ -33,7 +34,7 @@ public class SeurityConfig {
          http
                  .csrf(customizer -> customizer.disable())
                  .authorizeHttpRequests(request -> request
-                         .requestMatchers("login")
+                         .requestMatchers("register","login")
                          .permitAll()
                          .anyRequest().authenticated())
                  .httpBasic(Customizer.withDefaults())

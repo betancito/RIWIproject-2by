@@ -6,6 +6,7 @@ import lombok.*;
 import org.hibernate.annotations.Type;
 
 @Entity
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @Setter
@@ -22,6 +23,9 @@ public class UserEntity {
 
     @Column(nullable = false)
     private String password;
+
+    @Column(nullable = false)
+    private String email;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
