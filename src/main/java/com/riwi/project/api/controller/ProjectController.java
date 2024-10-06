@@ -1,6 +1,7 @@
 package com.riwi.project.api.controller;
 
-import com.riwi.project.api.dto.request.ProjectRequest;
+import com.riwi.project.api.dto.request.ProjectReq;
+ import com.riwi.project.api.dto.response.ProjectRes;
 import com.riwi.project.domain.model.ProjectEntity;
 import com.riwi.project.domain.services.ProjectService;
 import com.riwi.project.domain.services.EmailService;
@@ -22,8 +23,8 @@ public class ProjectController {
     private EmailService emailService;
 
     @PostMapping("/create")
-    public ResponseEntity<ProjectEntity> createProject(@RequestBody ProjectRequest projectRequest) {
-        ProjectEntity createdProject = projectService.create(projectRequest);
+    public ResponseEntity<ProjectRes> createProject(@RequestBody ProjectReq projectRequest) {
+        ProjectRes createdProject = projectService.create(projectRequest);
 
         // Enviar notificación por correo electrónico
         String emailBody = "Se ha creado un nuevo proyecto: " + createdProject.getName();
@@ -43,8 +44,8 @@ public class ProjectController {
     }
 
     @PutMapping("/update/{id}")
-    public ResponseEntity<ProjectEntity> updateProject(@PathVariable Long id, @RequestBody ProjectRequest projectRequest) {
-        ProjectEntity updatedProject = projectService.update(id, projectRequest);
+    public ResponseEntity<ProjectRes> updateProject(@PathVariable Long id, @RequestBody ProjectReq projectRequest) {
+        ProjectRes updatedProject = projectService.update(id, projectRequest);
 
         // Enviar notificación por correo electrónico al actualizar un proyecto
         String emailBody = "El proyecto con ID: " + id + " ha sido actualizado.";

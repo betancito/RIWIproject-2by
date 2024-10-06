@@ -1,11 +1,14 @@
 package com.riwi.project.domain.services;
 
-import com.riwi.project.api.dto.request.TaskRequest;
+import com.riwi.project.api.dto.request.TaskReq;
+import com.riwi.project.api.dto.response.TaskRes;
+import com.riwi.project.api.utils.TransformUtil;
 import com.riwi.project.domain.model.TaskEntity;
 import com.riwi.project.domain.repository.TaskRepository; // Asegúrate de que este import esté correcto
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -14,11 +17,15 @@ public class TaskService {
     @Autowired
     private TaskRepository taskRepository;
 
-    public TaskEntity create(TaskRequest taskRequest) {
-        TaskEntity task = new TaskEntity();
-        task.setName(taskRequest.getName());
+    @Autowired
+    private TransformUtil transformUtil;
 
-        return taskRepository.save(task);
+    public TaskRes create(TaskReq taskRequest) {
+        TaskEntity task = transformUtil.transformTaskEntity(taskRequest);
+        task.setCreatedAt(new Date(System.currentTimeMillis()));
+        task.setUpdatedAt(new Date(System.currentTimeMillis()));
+        taskRepository.save(task);
+        return transformUtil.transformTaskRes(task);
     }
 
     public List<TaskEntity> readAll() {
@@ -26,14 +33,20 @@ public class TaskService {
     }
 
     public TaskEntity readById(Long id) {
-        return taskRepository.findById(id).orElse(null);
+        return taskRepository.findById(id).orElseThrow(() -> new RuntimeException("Task not found"));
     }
 
-    public TaskEntity update(Long id, TaskRequest taskRequest) {
-        TaskEntity task = readById(id);
-        if (task != null) {
-            task.setName(taskRequest.getName());
-            return taskRepository.save(task);
+    public TaskRes update(Long id, TaskReq taskRequest) {
+        TaskEntity updatedTask = taskRepository.findById(id).orElseThrow(() -> new RuntimeException("Project not found"));
+        if (updatedTask != null) {
+            updatedTask.setName(taskRequest.getName());
+            updatedTask.setDescription(taskRequest.getDescription());
+            updatedTask.setStatus(taskRequest.getStatus());
+            updatedTask.setAssignedTo(taskRequest.getAssignedTo());
+            updatedTask.setUpdatedAt(new Date(System.currentTimeMillis()));
+            taskRepository.save(updatedTask);
+
+            return transformUtil.transformTaskRes(updatedTask);
         }
         return null;
     }

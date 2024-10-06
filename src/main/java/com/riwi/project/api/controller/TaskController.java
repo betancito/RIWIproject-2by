@@ -1,6 +1,7 @@
 package com.riwi.project.api.controller;
 
-import com.riwi.project.api.dto.request.TaskRequest;
+import com.riwi.project.api.dto.request.TaskReq;
+import com.riwi.project.api.dto.response.TaskRes;
 import com.riwi.project.domain.model.TaskEntity;
 import com.riwi.project.domain.services.TaskService;
 import com.riwi.project.domain.services.EmailService;
@@ -22,8 +23,8 @@ public class TaskController {
     private EmailService emailService;
 
     @PostMapping("/create")
-    public ResponseEntity<TaskEntity> createTask(@RequestBody TaskRequest taskRequest) {
-        TaskEntity createdTask = taskService.create(taskRequest);
+    public ResponseEntity<TaskRes> createTask(@RequestBody TaskReq taskRequest) {
+        TaskRes createdTask = taskService.create(taskRequest);
 
         // Enviar notificación por correo electrónico
         String emailBody = "Se ha creado una nueva tarea: " + createdTask.getName();
@@ -43,8 +44,8 @@ public class TaskController {
     }
 
     @PutMapping("/update/{id}")
-    public ResponseEntity<TaskEntity> updateTask(@PathVariable Long id, @RequestBody TaskRequest taskRequest) {
-        TaskEntity updatedTask = taskService.update(id, taskRequest);
+    public ResponseEntity<TaskRes> updateTask(@PathVariable Long id, @RequestBody TaskReq taskRequest) {
+        TaskRes updatedTask = taskService.update(id, taskRequest);
 
         // Enviar notificación por correo electrónico al actualizar una tarea
         String emailBody = "La tarea con ID: " + id + " ha sido actualizada.";

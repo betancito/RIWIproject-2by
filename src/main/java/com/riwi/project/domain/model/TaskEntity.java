@@ -4,7 +4,7 @@ import com.riwi.project.domain.enums.TaskStatus;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalDateTime;
+import java.util.List;
 
 @Table(name = "task")
 @Getter
@@ -12,7 +12,8 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-public class TaskEntity {
+@Builder
+public class TaskEntity extends Auditable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -24,11 +25,6 @@ public class TaskEntity {
     @Column(columnDefinition = "TEXT")
     private String description;
 
-    @Column(updatable = false)
-    private LocalDateTime createdAt;
-
-    private LocalDateTime updatedAt;
-
     @Enumerated(EnumType.STRING)
     private TaskStatus status;
 
@@ -36,15 +32,7 @@ public class TaskEntity {
     @JoinColumn(name = "project_id", nullable = false)
     private ProjectEntity project;
 
-    // Auditoría
-    @PrePersist
-    public void prePersist() {
-        this.createdAt = LocalDateTime.now();
-        this.updatedAt = LocalDateTime.now();
-    }
-
-    @PreUpdate
-    public void preUpdate() {
-        this.updatedAt = LocalDateTime.now();
-    }
+    @OneToMany(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private List<UserEntity> assignedTo;
 }

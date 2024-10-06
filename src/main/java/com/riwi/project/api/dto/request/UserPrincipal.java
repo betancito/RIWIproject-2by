@@ -1,6 +1,5 @@
 package com.riwi.project.api.dto.request;
 
-import com.riwi.project.domain.enums.UserRole;
 import com.riwi.project.domain.model.UserEntity;
 import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;

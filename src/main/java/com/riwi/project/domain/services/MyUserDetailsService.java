@@ -1,7 +1,6 @@
 package com.riwi.project.domain.services;
 
 import com.riwi.project.api.dto.request.UserPrincipal;
-import com.riwi.project.domain.enums.UserRole;
 import com.riwi.project.domain.model.UserEntity;
 import com.riwi.project.domain.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
