@@ -1,12 +1,15 @@
 package com.riwi.project.domain.services;
 
-import com.riwi.project.api.dto.request.ProjectRequest;
+import com.riwi.project.api.dto.request.ProjectReq;
+import com.riwi.project.api.dto.response.ProjectRes;
+import com.riwi.project.api.utils.TransformUtil;
 import com.riwi.project.domain.model.ProjectEntity;
 import com.riwi.project.domain.repository.ProjectRepository;
+import com.riwi.project.infrastructure.security.JwtService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.context.config.ConfigDataResourceNotFoundException;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -15,34 +18,46 @@ public class ProjectService {
     @Autowired
     private ProjectRepository projectRepo;
 
-    public ProjectEntity readById(Long id){
-        return projectRepo.findById(id).orElse(null);
+    @Autowired
+    private TransformUtil transformUtil;
+
+    @Autowired
+    private JwtService jwtService;
+
+    @Autowired
+    private UserService userService;
+
+    public ProjectEntity readById(Long id) {
+        return projectRepo.findById(id).orElseThrow(() -> new RuntimeException("Project not found"));
     }
 
-    public void delete(Long id){
-         projectRepo.deleteById(id);
+    public void delete(Long id) {
+        projectRepo.deleteById(id);
     }
 
-    public List<ProjectEntity> readAll(){
+    public List<ProjectEntity> readAll() {
         return projectRepo.findAll();
     }
 
-    public ProjectEntity create(ProjectRequest projectRequest){
-        ProjectEntity project = new ProjectEntity();
-        project.setName(projectRequest.getName());
-        project.setDescription(projectRequest.getDescription());
-        return projectRepo.save(project);
+    public ProjectRes create(ProjectReq projectReq) {
+        ProjectEntity newProject = transformUtil.transformProjectEntity(projectReq);
+        newProject.setCreatedAt(new Date(System.currentTimeMillis()));
+        newProject.setUpdatedAt(new Date(System.currentTimeMillis()));
+        projectRepo.save(newProject);
+        return transformUtil.transformProjectRes(newProject);
     }
 
-    public ProjectEntity update(Long id,ProjectRequest projectRequest){
-      ProjectEntity project = projectRepo.findById(id).orElse(null);
-        if (projectRequest.getName() != null) {
-            project.setName(projectRequest.getName());
-        }
-        if (projectRequest.getDescription() != null) {
-            project.setDescription(projectRequest.getDescription());
-        }
-        return projectRepo.save(project);
-    }
+    public ProjectRes update(Long id, ProjectReq projectRequest) {
 
+        ProjectEntity updatedProject = projectRepo.findById(id).orElseThrow(() -> new RuntimeException("Project not found"));
+
+        if (updatedProject != null) {
+            updatedProject = transformUtil.transformProjectEntity(projectRequest);
+            updatedProject.setUpdatedAt(new Date(System.currentTimeMillis()));
+            projectRepo.save(updatedProject);
+        }
+
+        return transformUtil.transformProjectRes(updatedProject);
+    }
 }
+
